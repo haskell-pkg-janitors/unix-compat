@@ -1,4 +1,4 @@
-## Unreleased
+## Version 0.7 (2023-03-15)
 
 - Remote `System.PosixCompat.User` module
 
