@@ -40,7 +40,6 @@ Library
     System.PosixCompat.Time
     System.PosixCompat.Types
     System.PosixCompat.Unistd
-    System.PosixCompat.User
 
   if os(windows)
     c-sources:
