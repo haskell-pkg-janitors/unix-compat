@@ -7,6 +7,7 @@ package, on other platforms it emulates the operations as far as possible.
 -}
 module System.PosixCompat (
       module System.PosixCompat.Files
+    , module System.PosixCompat.Process
     , module System.PosixCompat.Temp
     , module System.PosixCompat.Time
     , module System.PosixCompat.Types
@@ -15,6 +16,7 @@ module System.PosixCompat (
     ) where
 
 import System.PosixCompat.Files
+import System.PosixCompat.Process
 import System.PosixCompat.Temp
 import System.PosixCompat.Time
 import System.PosixCompat.Types
