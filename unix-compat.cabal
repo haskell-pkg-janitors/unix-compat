@@ -6,11 +6,11 @@ description:    This package provides portable implementations of parts
                 package when available. When it isn't available,
                 portable implementations are used.
 
-homepage:       http://github.com/haskell-pkg-janitors/unix-compat
+homepage:       https://github.com/haskell-pkg-janitors/unix-compat
 license:        BSD3
 license-file:   LICENSE
 author:         Björn Bringert, Duncan Coutts, Jacob Stanley, Bryan O'Sullivan
-maintainer:     Mitchell Rosen <mitchellwrosen@gmail.com>
+maintainer:     https://github.com/haskell-pkg-janitors
 category:       System
 build-type:     Simple
 cabal-version:  >= 1.10
@@ -20,7 +20,7 @@ extra-source-files:
 
 source-repository head
   type:     git
-  location: git@github.com:haskell-pkg-janitors/unix-compat.git
+  location: https://github.com/haskell-pkg-janitors/unix-compat.git
 
 flag old-time
   description: build against old-time package

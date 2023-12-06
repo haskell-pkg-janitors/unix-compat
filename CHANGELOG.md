@@ -1,4 +1,4 @@
-## Version 0.7.1 (2023-11-01)
+## Version 0.7.1 (2023-12-06) Santa Clause edition
 
 - Add `System.PosixCompat.Process` module, exporting `getProcessID`
 
