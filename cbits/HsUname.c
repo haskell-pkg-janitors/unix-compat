@@ -289,7 +289,7 @@ int unixcompat_os_display_string(char *pszOS, size_t BUFSIZE)
         }
 
         char buf[80];
-        StringCchPrintf(buf, 80, TEXT(" (build %d)"), osvi.dwBuildNumber);
+        StringCchPrintf(buf, 80, TEXT(" (build %ld)"), osvi.dwBuildNumber);
         StringCchCat(pszOS, BUFSIZE, buf);
 
         if (osvi.dwMajorVersion >= 6) {
