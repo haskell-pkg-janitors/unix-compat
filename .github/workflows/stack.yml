@@ -1,0 +1,163 @@
+name: stack
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  stack:
+    name: Stack ${{ matrix.ghc }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+
+        - os: macos-latest
+          ghc: 9.8.2
+          resolver: nightly-2024-06-22
+        - os: macos-latest
+          ghc: 9.2.8
+          resolver: lts-20.26
+          # GHC < 9.2 not supported on macos-14 ARM runner
+          # https://github.com/haskell-actions/setup/issues/77
+
+        - os: windows-latest
+          ghc: 9.8.2
+          resolver: nightly-2024-06-22
+        - os: windows-latest
+          ghc: 8.4.4
+          resolver: lts-12.26
+
+        - os: ubuntu-latest
+          ghc: 9.8.2
+          resolver: nightly-2024-06-22
+        - os: ubuntu-latest
+          ghc: 9.6.5
+          resolver: lts-22.26
+        - os: ubuntu-latest
+          ghc: 9.4.8
+          resolver: lts-21.25
+        - os: ubuntu-latest
+          ghc: 9.2.8
+          resolver: lts-20.26
+        - os: ubuntu-latest
+          ghc: 9.0.2
+          resolver: lts-19.33
+        - os: ubuntu-latest
+          ghc: 8.10.7
+          resolver: lts-18.28
+        - os: ubuntu-latest
+          ghc: 8.8.4
+          resolver: lts-16.31
+        - os: ubuntu-latest
+          ghc: 8.6.5
+          resolver: lts-14.27
+        - os: ubuntu-latest
+          ghc: 8.4.4
+          resolver: lts-12.26
+
+        # Tests need directory-1.3.1.0 which entered LTS for GHC 8.4.
+        # - os: ubuntu-latest
+        #   ghc: 8.2.2
+        #   resolver: lts-11.22
+        # - os: ubuntu-latest
+        #   ghc: 8.0.2
+        #   resolver: lts-9.21
+
+    env:
+      stack: 'stack --system-ghc --no-install-ghc'
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Install GHC and stack with haskell-actions/setup
+      uses: haskell-actions/setup@v2
+      id:   setup
+      with:
+        ghc-version: ${{ matrix.ghc }}
+        enable-stack: true
+        cabal-update: false
+
+    - name: Create stack.yaml
+      run: |
+        cat > stack.yaml <<EOF
+        resolver: ${{ matrix.resolver }}
+        compiler: ghc-${{ matrix.ghc }}
+        packages: [.]
+        EOF
+
+    # According to https://github.com/commercialhaskell/stack/issues/5754#issuecomment-1696156869
+    # not all of ~/.stack should be cached,
+    # only the index (pantry) and the dependencies (sqlite3+snapshots).
+
+    ## Pantry
+    ########################################################################
+
+    - name: Restore cached stack pantry
+      uses: actions/cache/restore@v4
+      id:   cache-pantry
+      with:
+        path: ${{ steps.setup.outputs.stack-root }}/pantry
+        key:  ${{ runner.os }}-stack-${{ steps.setup.outputs.stack-version }}-pantry-resolver-${{ matrix.resolver }}
+        # No fall-back keys here!
+
+    - name: Stack update
+      if:   steps.cache-pantry.outputs.cache-hit != 'true'
+      run:  ${{ env.stack }} update
+
+    - name: Cache stack pantry
+      if:   steps.cache-pantry.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.setup.outputs.stack-root }}/pantry
+        key:  ${{ steps.cache-pantry.outputs.cache-primary-key }}
+
+    ## Dependencies
+    ########################################################################
+
+    - name: Stack build plan
+      run:  ${{ env.stack }} test --dry-run > '.build-plan.txt'
+
+    - name: Restore cached dependencies
+      uses: actions/cache/restore@v4
+      id:   cache-deps
+      with:
+        path: |
+          ${{ steps.setup.outputs.stack-root }}/stack.sqlite3
+          ${{ steps.setup.outputs.stack-root }}/snapshots
+        key: ${{ runner.os }}-stack-${{ steps.setup.outputs.stack-version }}-ghc-${{ steps.setup.outputs.ghc-version }}-resolver-${{ matrix.resolver }}-plan-${{ hashfiles('.build-plan.txt') }}
+        restore-keys: |
+             ${{ runner.os }}-stack-${{ steps.setup.outputs.stack-version }}-ghc-${{ steps.setup.outputs.ghc-version }}-resolver-${{ matrix.resolver }}-
+             ${{ runner.os }}-stack-${{ steps.setup.outputs.stack-version }}-ghc-${{ steps.setup.outputs.ghc-version }}-
+
+    - name: Build dependencies
+      if:   steps.cache-deps.outputs.cache-hit != 'true'
+      run:  ${{ env.stack }} test --dependencies-only
+
+    - name: Cache dependencies
+      if:   steps.cache-deps.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ steps.setup.outputs.stack-root }}/stack.sqlite3
+          ${{ steps.setup.outputs.stack-root }}/snapshots
+        key:  ${{ steps.cache-deps.outputs.cache-primary-key }}
+
+    ## Build and test STMonadTrans
+    ########################################################################
+
+    - name: Build w/ tests
+      run: ${{ env.stack }} test --no-run-tests
+
+    - name: Run tests
+      run: ${{ env.stack }} test
