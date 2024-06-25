@@ -10,14 +10,28 @@ jobs:
     name: ${{ matrix.os }} - GHC ${{ matrix.ghc }}
     runs-on: ${{ matrix.os }}
     strategy:
-      matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc:
-          - 9.8
-          - 9.6
-          - 9.4
-          - 9.2
       fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        # Check the haddock step below which is limited to a single GHC version!
+        ghc:
+          - '9.10'
+          - '9.8'
+          - '9.6'
+          - '9.4'
+          - '9.2'
+          - '9.0'
+          - '8.10'
+          - '8.8'
+          - '8.6'
+          - '8.4'
+          - '8.2'
+          - '8.0'
+        include:
+          - os: macos-latest
+            ghc: '9.10'
+          - os: windows-latest
+            ghc: '9.10'
 
     steps:
     - uses: actions/checkout@v4
@@ -34,7 +48,7 @@ jobs:
         cabal build all --dry-run
 
     - name: Restore cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       id:   cache
       with:
         path: ${{ steps.setup.outputs.cabal-store }}
@@ -48,12 +62,13 @@ jobs:
     - run: cabal build all
     - run: cabal test all
     - run: cabal haddock
+      if:  matrix.ghc == '9.8'
     - run: cabal check
     - run: cabal sdist
 
     - name: Save cache
-      uses: actions/cache/save@v3
-      if:   always()
+      uses: actions/cache/save@v4
+      if:   always() && steps.cache.outputs.cache-hit != 'true'
       with:
         key:  ${{ steps.cache.outputs.cache-primary-key }}
         path: ${{ steps.setup.outputs.cabal-store }}
