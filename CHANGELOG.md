@@ -1,11 +1,17 @@
+## Version 0.7.2 (2024-06-25)
+
+- Remove flag `old-time` and drop support for `old-time`.
+- Remove support for GHC 7.
+- Tested with GHC 8.0 - 9.10.
+
 ## Version 0.7.1 (2023-12-06) Santa Clause edition
 
-- Add `System.PosixCompat.Process` module, exporting `getProcessID`
+- Add `System.PosixCompat.Process` module, exporting `getProcessID`.
 
 ## Version 0.7 (2023-03-15)
 
-- Remove `System.PosixCompat.User` module
+- Remove `System.PosixCompat.User` module.
 
 ## Version 0.6 (2022-05-22)
 
-- Better support for symbolic links
+- Better support for symbolic links.
