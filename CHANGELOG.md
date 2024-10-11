@@ -1,3 +1,9 @@
+## Version 0.7.3 (2024-10-11)
+
+- Fix `sysmacros.h` include for GNU/Hurd
+  ([PR #12](https://github.com/haskell-pkg-janitors/unix-compat/pull/12)).
+- Tested with GHC 8.0 - 9.10.
+
 ## Version 0.7.2 (2024-06-25)
 
 - Remove flag `old-time` and drop support for `old-time`.
