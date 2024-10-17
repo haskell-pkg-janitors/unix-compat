@@ -47,7 +47,7 @@
 static int random(uint32_t *);
 static int _gettemp(char *, int *);
 
-static const unsigned char padchar[] =
+static const char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 int unixcompat_mkstemp(char *path)
