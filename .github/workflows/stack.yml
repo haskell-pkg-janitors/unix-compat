@@ -22,8 +22,11 @@ jobs:
         include:
 
         - os: macos-latest
-          ghc: 9.8.2
-          resolver: nightly-2024-10-11
+          ghc: 9.10.1
+          resolver: nightly-2024-12-12
+        - os: macos-latest
+          ghc: 9.8.4
+          resolver: lts-23.0
         - os: macos-latest
           ghc: 9.2.8
           resolver: lts-20.26
@@ -31,18 +34,24 @@ jobs:
           # https://github.com/haskell-actions/setup/issues/77
 
         - os: windows-latest
-          ghc: 9.8.2
-          resolver: nightly-2024-10-11
+          ghc: 9.10.1
+          resolver: nightly-2024-12-12
+        - os: windows-latest
+          ghc: 9.8.4
+          resolver: lts-23.0
         - os: windows-latest
           ghc: 8.4.4
           resolver: lts-12.26
 
         - os: ubuntu-latest
-          ghc: 9.8.2
-          resolver: nightly-2024-10-11
+          ghc: 9.10.1
+          resolver: nightly-2024-12-12
+        - os: ubuntu-latest
+          ghc: 9.8.4
+          resolver: lts-23.0
         - os: ubuntu-latest
           ghc: 9.6.6
-          resolver: lts-22.37
+          resolver: lts-22.43
         - os: ubuntu-latest
           ghc: 9.4.8
           resolver: lts-21.25

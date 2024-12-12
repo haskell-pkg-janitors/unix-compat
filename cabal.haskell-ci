@@ -1,0 +1,4 @@
+branches: main
+tests: >= 8.4
+  -- tests need directory >= 1.3.1.0 which ships from GHC 8.4 on
+  -- so we don't bother to test on these old GHC versions
