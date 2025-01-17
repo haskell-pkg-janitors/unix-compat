@@ -12,26 +12,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
         # Check the haddock step below which is limited to a single GHC version!
         ghc:
+          - '9.12'
           - '9.10'
           - '9.8'
-          - '9.6'
-          - '9.4'
-          - '9.2'
-          - '9.0'
-          - '8.10'
-          - '8.8'
-          - '8.6'
+          # - '9.6'
+          # - '9.4'
+          # - '9.2'
+          # - '9.0'
+          # - '8.10'
+          # - '8.8'
+          # - '8.6'
           - '8.4'
-          - '8.2'
-          - '8.0'
+          # hsc2hs fails on windows-2022 for GHCs 8.0 and 8.2
+          # https://github.com/haskell/hsc2hs/issues/81
+          # - '8.2'
+          # - '8.0'
         include:
           - os: macos-latest
-            ghc: '9.10'
-          - os: windows-latest
-            ghc: '9.10'
+            ghc: '9.12'
+          - os: ubuntu-latest
+            ghc: '9.12'
 
     steps:
     - uses: actions/checkout@v4
@@ -60,9 +63,10 @@ jobs:
       run: cabal build all --dependencies-only
 
     - run: cabal build all
+    - run: cabal build all --enable-tests
     - run: cabal test all
     - run: cabal haddock
-      if:  matrix.ghc == '9.8'
+      if:  matrix.ghc == '9.12'
     - run: cabal check
     - run: cabal sdist
 
