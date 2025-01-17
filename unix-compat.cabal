@@ -1,6 +1,7 @@
 cabal-version:  >= 1.10
 name:           unix-compat
 version:        0.7.3
+x-revision:     1
 synopsis:       Portable POSIX-compatibility layer.
 description:    This package provides portable implementations of parts
                 of the unix package. This package re-exports the unix
@@ -16,7 +17,7 @@ category:       System
 build-type:     Simple
 
 tested-with:
-  GHC == 9.12.0
+  GHC == 9.12.1
   GHC == 9.10.1
   GHC == 9.8.4
   GHC == 9.6.6
