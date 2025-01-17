@@ -18,16 +18,18 @@ jobs:
           - '9.12'
           - '9.10'
           - '9.8'
-          - '9.6'
-          - '9.4'
+          # - '9.6'
+          # - '9.4'
           # - '9.2'
           # - '9.0'
           # - '8.10'
           # - '8.8'
           # - '8.6'
-          # - '8.4'
+          - '8.4'
+          # hsc2hs fails on windows-2022 for GHCs 8.0 and 8.2
+          # https://github.com/haskell/hsc2hs/issues/81
           # - '8.2'
-          - '8.0'
+          # - '8.0'
         include:
           - os: macos-latest
             ghc: '9.12'
