@@ -106,11 +106,11 @@ module System.PosixCompat.Files (
 
 #ifndef mingw32_HOST_OS
 
-#include "HsUnixCompat.h"
+#include "HsUnixConfig.h"
 
 import System.Posix.Files
 
-#if NEED_setSymbolicLinkOwnerAndGroup
+#if !HAVE_LCHOWN
 import System.PosixCompat.Types
 
 setSymbolicLinkOwnerAndGroup :: FilePath -> UserID -> GroupID -> IO ()
