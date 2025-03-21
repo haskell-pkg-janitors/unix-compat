@@ -69,10 +69,11 @@ Library
 
   else
     build-depends: unix      >= 2.7.2.0  && < 2.9
-    include-dirs: include
-    includes: HsUnixCompat.h
-    install-includes: HsUnixCompat.h
-    c-sources: cbits/HsUnixCompat.c
+    if !arch(wasm32)
+      include-dirs: include
+      includes: HsUnixCompat.h
+      install-includes: HsUnixCompat.h
+      c-sources: cbits/HsUnixCompat.c
     if os(solaris)
       cc-options: -DSOLARIS
 
