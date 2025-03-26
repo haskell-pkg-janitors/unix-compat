@@ -11,13 +11,13 @@ module System.PosixCompat.Temp (
       mkstemp
     ) where
 
-#ifndef mingw32_HOST_OS
+#if !(defined(mingw32_HOST_OS) || defined(wasm32_HOST_ARCH))
 -- Re-export unix package
 
 import System.Posix.Temp
 
 #elif defined(__GLASGOW_HASKELL__)
--- Windows w/ GHC, we have fdToHandle so we
+-- Window/WASM w/ GHC, we have fdToHandle so we
 -- can use our own implementation of mkstemp.
 
 import System.IO (Handle)
