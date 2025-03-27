@@ -63,7 +63,6 @@ jobs:
       run: cabal build all --dependencies-only
 
     - run: cabal build all
-    - run: cabal build all --enable-tests
     - run: cabal test all
     - run: cabal haddock
       if:  matrix.ghc == '9.12'
