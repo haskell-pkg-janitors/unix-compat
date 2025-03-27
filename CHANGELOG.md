@@ -1,3 +1,7 @@
+## Unreleased
+
+ - Add wasm32-wasi support.
+
 ## Version 0.7.3 (2024-10-11)
 
 - Fix `sysmacros.h` include for GNU/Hurd

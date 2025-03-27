@@ -12,7 +12,7 @@ module System.PosixCompat.Extensions (
     ) where
 
 
-#ifndef mingw32_HOST_OS
+#if !(defined(mingw32_HOST_OS) || defined(wasm32_HOST_ARCH))
 #include "HsUnixCompat.h"
 #endif
 
@@ -27,7 +27,7 @@ type CMinor = CUInt
 --
 -- The portable implementation always returns @0@.
 deviceMajor :: DeviceID -> CMajor
-#ifdef mingw32_HOST_OS
+#if defined(mingw32_HOST_OS) || defined(wasm32_HOST_ARCH)
 deviceMajor _ = 0
 #else
 deviceMajor dev = unix_major dev
@@ -39,7 +39,7 @@ foreign import ccall unsafe "unix_major" unix_major :: CDev -> CUInt
 --
 -- The portable implementation always returns @0@.
 deviceMinor :: DeviceID -> CMinor
-#ifdef mingw32_HOST_OS
+#if defined(mingw32_HOST_OS) || defined(wasm32_HOST_ARCH)
 deviceMinor _ = 0
 #else
 deviceMinor dev = unix_minor dev
@@ -49,7 +49,7 @@ foreign import ccall unsafe "unix_minor" unix_minor :: CDev -> CUInt
 
 -- | Creates a 'DeviceID' for a device file given a major and minor number.
 makeDeviceID :: CMajor -> CMinor -> DeviceID
-#ifdef mingw32_HOST_OS
+#if defined(mingw32_HOST_OS) || defined(wasm32_HOST_ARCH)
 makeDeviceID _ _ = 0
 #else
 makeDeviceID ma mi = unix_makedev ma mi

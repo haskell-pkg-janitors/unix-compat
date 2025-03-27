@@ -1,0 +1,27 @@
+name: CI (wasm32-wasi)
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GHC_WASM_META: 45f73c3e075fa38efe84055b0dba87996948101d
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+
+      - name: Build
+        run: |
+          nix shell "gitlab:haskell-wasm/ghc-wasm-meta?host=gitlab.haskell.org&rev=${GHC_WASM_META}"#{wasmtime,wasm32-wasi-cabal-9_12,wasm32-wasi-ghc-9_12} --command \
+            wasm32-wasi-cabal update
+          nix shell "gitlab:haskell-wasm/ghc-wasm-meta?host=gitlab.haskell.org&rev=${GHC_WASM_META}"#{wasmtime,wasm32-wasi-cabal-9_12,wasm32-wasi-ghc-9_12} --command \
+            wasm32-wasi-cabal build
+
+      - name: Test
+        run: |
+          nix shell "gitlab:haskell-wasm/ghc-wasm-meta?host=gitlab.haskell.org&rev=${GHC_WASM_META}"#{wasmtime,wasm32-wasi-cabal-9_12,wasm32-wasi-ghc-9_12} --command \
+            wasm32-wasi-cabal test --test-wrapper ./tests/run-wasmtime.sh

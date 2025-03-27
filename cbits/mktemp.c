@@ -41,13 +41,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#if defined(__wasm__)
+#include <sys/random.h>
+#else
 #include <windows.h>
 #include <wincrypt.h>
 
-static int random(uint32_t *);
+#define open _open
+#define stat _stat
+#endif
+
+static int unixcompat_random(uint32_t *);
 static int _gettemp(char *, int *);
 
-static const unsigned char padchar[] =
+static const char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 int unixcompat_mkstemp(char *path)
@@ -64,7 +72,7 @@ static int _gettemp(char *path, int *doopen)
 {
     char *start, *trv, *suffp, *carryp;
     char *pad;
-    struct _stat sbuf;
+    struct stat sbuf;
     int rval;
     uint32_t randidx, randval;
     char carrybuf[MAXPATHLEN];
@@ -84,7 +92,7 @@ static int _gettemp(char *path, int *doopen)
 
     /* Fill space with random characters */
     while (trv >= path && *trv == 'X') {
-        if (!random(&randval)) {
+        if (!unixcompat_random(&randval)) {
             /* this should never happen */
             errno = EIO;
             return 0;
@@ -104,7 +112,7 @@ static int _gettemp(char *path, int *doopen)
         for (; trv > path; --trv) {
             if (*trv == '/') {
                 *trv = '\0';
-                rval = _stat(path, &sbuf);
+                rval = stat(path, &sbuf);
                 *trv = '/';
                 if (rval != 0)
                     return (0);
@@ -120,11 +128,11 @@ static int _gettemp(char *path, int *doopen)
     for (;;) {
         if (doopen) {
             if ((*doopen =
-                _open(path, O_CREAT|O_EXCL|O_RDWR, 0600)) >= 0)
+                open(path, O_CREAT|O_EXCL|O_RDWR, 0600)) >= 0)
                 return (1);
             if (errno != EEXIST)
                 return (0);
-        } else if (_stat(path, &sbuf))
+        } else if (stat(path, &sbuf))
             return (errno == ENOENT);
 
         /* If we have a collision, cycle through the space of filenames */
@@ -154,7 +162,14 @@ static int _gettemp(char *path, int *doopen)
     /*NOTREACHED*/
 }
 
-static int random(uint32_t *value)
+#if defined(__wasm__)
+static int unixcompat_random(uint32_t *value)
+{
+    int r = getentropy(value, sizeof(uint32_t));
+    return r == 0 ? 1 : 0;
+}
+#else
+static int unixcompat_random(uint32_t *value)
 {
     /* This handle is never released. Windows will clean up when the process
      * exits. Python takes this approach when emulating /dev/urandom, and if
@@ -171,3 +186,4 @@ static int random(uint32_t *value)
 
     return 1;
 }
+#endif
