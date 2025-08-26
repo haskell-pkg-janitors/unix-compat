@@ -1,7 +1,12 @@
+## Version 0.7.4.1 (2025-08-26)
+
+- Fix build with `-Werror=unused-packages`.
+- Tested with GHC 8.0 - 9.14 alpha1.
+
 ## Version 0.7.4 (2025-03-27)
 
- - Add `wasm32-wasi` support
-   ([PR #16](https://github.com/haskell-pkg-janitors/unix-compat/pull/16)).
+- Add `wasm32-wasi` support
+  ([PR #16](https://github.com/haskell-pkg-janitors/unix-compat/pull/16)).
 - Tested with GHC 8.0 - 9.12.
 
 ## Version 0.7.3 (2024-10-11)
