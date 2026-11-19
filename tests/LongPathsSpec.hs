@@ -16,7 +16,7 @@ longPathsSpec = do
         let dir = foldl (</>) tmp (replicate 30 "directory")
             file = dir </> "file"
         D.createDirectoryIfMissing True dir
-        writeFile file "contents"
+        writeLongFile file
         assert $ length file > 260
 
         dirStat <- getFileStatus dir
@@ -31,7 +31,7 @@ longPathsSpec = do
             file = rel </> "file"
             dotted = tmp </> rel </> ".." </> "directory" </> "file"
         D.createDirectoryIfMissing True rel
-        writeFile file "contents"
+        writeLongFile file
         assert $ length (tmp </> file) > 260
 
         relStat <- getFileStatus file
@@ -40,6 +40,12 @@ longPathsSpec = do
         assert $ isRegularFile dottedStat
 
   where
+
+    -- Older GHCs' openFile doesn't accept paths longer than MAX_PATH, but
+    -- renameFile does.
+    writeLongFile path = do
+      writeFile "short" "contents"
+      D.renameFile "short" path
 
     runInTempDir action = do
       orig <- D.getCurrentDirectory

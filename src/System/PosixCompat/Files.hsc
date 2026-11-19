@@ -142,7 +142,7 @@ import qualified System.OsPath.Windows as WindowsPath (decodeFS)
 #elif MIN_VERSION_directory(1,3,4)
 import qualified System.Directory.Internal as Directory (furnishPath)
 #else
-import qualified System.Directory.Internal as Directory (toExtendedLengthPath)
+import qualified System.Directory.Internal as Directory (prependCurrentDirectory, toExtendedLengthPath)
 #endif
 import System.FilePath (takeExtension)
 import System.IO (IOMode(..), openFile, hSetFileSize, hClose)
@@ -388,8 +388,8 @@ getStatus forLink path = do
         f True m  = m
         f False _ = nullFileMode
 
--- | Prepare a path for CreateFile the way System.Directory does, so that
--- MAX_PATH doesn't apply where it can be avoided.
+-- | Prepare a path for CreateFile as System.Directory.getFileMetadata does,
+-- so that MAX_PATH doesn't apply where it can be avoided.
 furnishPath :: FilePath -> IO FilePath
 #if MIN_VERSION_directory(1,3,8)
 furnishPath path =
@@ -397,7 +397,8 @@ furnishPath path =
 #elif MIN_VERSION_directory(1,3,4)
 furnishPath = Directory.furnishPath
 #else
-furnishPath = return . Directory.toExtendedLengthPath
+furnishPath path =
+  Directory.toExtendedLengthPath <$> Directory.prependCurrentDirectory path
 #endif
 
 getSymbolicLinkStatus :: FilePath -> IO FileStatus
