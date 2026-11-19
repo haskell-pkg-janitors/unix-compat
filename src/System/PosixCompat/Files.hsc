@@ -135,6 +135,15 @@ import System.Directory (executable, setOwnerExecutable)
 import System.Directory (searchable, setOwnerSearchable)
 import System.Directory (doesFileExist, doesDirectoryExist)
 import System.Directory (getSymbolicLinkTarget)
+#if MIN_VERSION_directory(1,3,8)
+import qualified System.Directory.Internal as Directory (furnishPath)
+import qualified System.OsPath as OsPath (encodeFS)
+import qualified System.OsPath.Windows as WindowsPath (decodeFS)
+#elif MIN_VERSION_directory(1,3,4)
+import qualified System.Directory.Internal as Directory (furnishPath)
+#else
+import qualified System.Directory.Internal as Directory (prependCurrentDirectory, toExtendedLengthPath)
+#endif
 import System.FilePath (takeExtension)
 import System.IO (IOMode(..), openFile, hSetFileSize, hClose)
 import System.IO.Error
@@ -319,7 +328,8 @@ isSocket stat =
 
 getStatus :: Bool -> FilePath -> IO FileStatus
 getStatus forLink path = do
-    info  <- bracket openPath closeHandle getFileInformationByHandle
+    path' <- furnishPath path
+    info  <- bracket (openPath path') closeHandle getFileInformationByHandle
     let atime = windowsToPosixTime (bhfiLastAccessTime info)
         mtime = windowsToPosixTime (bhfiLastWriteTime info)
         ctime = windowsToPosixTime (bhfiCreationTime info)
@@ -351,7 +361,7 @@ getStatus forLink path = do
              , statusChangeTimeHiRes = ctime
              }
   where
-    openPath = createFile path
+    openPath p = createFile p
                  fILE_READ_EA
                  (fILE_SHARE_READ .|. fILE_SHARE_WRITE .|. fILE_SHARE_DELETE)
                  Nothing
@@ -377,6 +387,19 @@ getStatus forLink path = do
               (ownerExecuteMode .|. groupExecuteMode .|. otherExecuteMode)
         f True m  = m
         f False _ = nullFileMode
+
+-- | Prepare a path for CreateFile as System.Directory.getFileMetadata does,
+-- so that MAX_PATH doesn't apply where it can be avoided.
+furnishPath :: FilePath -> IO FilePath
+#if MIN_VERSION_directory(1,3,8)
+furnishPath path =
+  OsPath.encodeFS path >>= Directory.furnishPath >>= WindowsPath.decodeFS
+#elif MIN_VERSION_directory(1,3,4)
+furnishPath = Directory.furnishPath
+#else
+furnishPath path =
+  Directory.toExtendedLengthPath <$> Directory.prependCurrentDirectory path
+#endif
 
 getSymbolicLinkStatus :: FilePath -> IO FileStatus
 getSymbolicLinkStatus = getStatus True
